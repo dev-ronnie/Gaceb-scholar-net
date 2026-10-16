@@ -1,48 +1,40 @@
-# GACEB Scholar — simple GitHub Pages edition
+# GACEB Scholar — Super Multi-page Edition
 
-This is a plain HTML/CSS/JavaScript website. It has no React build step, npm install, or build command, which avoids the white-screen issue caused by publishing React source files directly.
+## Pages included
+- Home (`index.html`)
+- Courses (`courses.html`)
+- PDF Library and upload (`resources.html`)
+- Quick quizzes (`quizzes.html`)
+- Weekly study planner (`planner.html`)
+- Coins, referrals, Premium and donations (`coins.html`)
+- Gauge Assistant (`assistant.html`)
+- About and real photo gallery (`about.html`)
+- Contact (`contact.html`)
+- Student dashboard and admin moderation (`dashboard.html`)
 
-## 1. Upload it to GitHub (phone-friendly)
-1. Download and extract `GACEB_Scholar_Professional.zip` on your phone.
-2. Open your existing repository: `Gaceb-e-scholar-platform`.
-3. Use **Add file → Upload files** and upload the files inside the extracted folder into the repository root. Do not upload the ZIP itself.
-4. Preserve the `assets` folder and its image files. The upload should place `index.html`, `styles.css`, `app.js`, `config.js`, `supabase-schema.sql`, and `SETUP.md` at the top level.
-5. Commit the upload. If GitHub cannot replace files or upload a folder on mobile, stop and use GitHub's web upload from a computer rather than deleting files blindly.
-6. In **Settings → Pages**, choose **Deploy from a branch**, branch `main`, folder `/(root)`. Wait for the deployment to finish, then reload the site. The page should render even before the database is configured.
+## Upload to GitHub Pages from Android
+1. Download and extract `GACEB_Scholar_Super_Multipage.zip` on your phone or computer.
+2. Open your existing repository: `dev-ronnie/Gaceb-e-scholar-platform`.
+3. Upload **all files and folders inside the extracted folder** into the repository root. Keep the `assets` folder and all five image files. Do not upload only `index.html`; do not nest everything inside another folder.
+4. If GitHub asks whether to replace existing files, replace the old `index.html`, `styles.css`, `app.js`, `config.js`, and `supabase-schema.sql` with these package versions. Keep all `assets/` files.
+5. Commit changes. Keep Pages set to branch `main`, folder `/(root)`.
+6. Open the published site and refresh. If old images are cached, clear browser cache or open in a private tab. The site uses relative `assets/...` paths and includes the image files in this ZIP.
 
-## 2. Connect real student accounts, database, PDF uploads and coins
-These require a Supabase project; GitHub Pages by itself is only static hosting.
-1. Create a project at https://supabase.com/ and wait for it to finish provisioning.
-2. In Supabase, open **SQL Editor → New query**, paste the full contents of `supabase-schema.sql`, and run it.
-3. Open **Project Settings → API** (or API Keys). Copy the Project URL and the **publishable/anon public key**. Never use a `service_role` or secret key in a browser.
-4. Open `config.js` in GitHub and replace `https://YOUR-PROJECT.supabase.co` and `YOUR-SUPABASE-ANON-KEY` with your own Project URL and public key. Save/commit.
-5. In Supabase **Authentication → URL Configuration**, add your published GitHub Pages address as a Site URL and as an allowed Redirect URL. For this repo it will usually be `https://dev-ronnie.github.io/Gaceb-e-scholar-platform/`.
-6. In Supabase **Authentication → Providers → Email**, decide whether to require email confirmation. If enabled, students must confirm their email before they can log in.
-7. Sign up with your own email on the website. Then, in Supabase SQL Editor, promote your own account to admin with:
-   `update public.profiles set role='admin' where email='YOUR-EMAIL-ADDRESS';`
-   Replace the email with your login email. Run this only for your own trusted administrator account. Refresh/log in again. The Admin tables button will appear in your account panel.
+## Connect database and accounts
+1. Create a Supabase project.
+2. In Supabase SQL Editor, run all of `supabase-schema.sql` in a new project.
+3. In the Supabase project's API settings, copy the project URL and the **anon/publishable key**.
+4. Edit `config.js` in GitHub and replace `YOUR-PROJECT` and `YOUR-SUPABASE-ANON-KEY` with those two public values. Never put a `service_role` key, payment secret, password or Mobile Money PIN in website files.
+5. In Supabase Authentication URL settings, set the Site URL and allowed redirect URL to the exact published GitHub Pages URL.
+6. Register your account, then use Supabase SQL Editor to promote only your own account to admin:
+   `update public.profiles set role='admin' where email='YOUR-LOGIN-EMAIL';`
+7. Log in again and visit `dashboard.html` to use moderation and student/referral tables.
 
-The schema creates tables for profiles, PDF resources, coin transactions, referrals, subscriptions and contact messages. Row-level security protects student records. Students can see their own profile and coin history; only an admin can see the full student table and approve PDFs. An approved PDF upload awards 5 coins once; verified referrals award 5 coins once. The admin must verify referrals after checking they are genuine. Do not promote other users to admin unless you trust them.
-
-## 3. Real PDF storage
-The SQL creates a private `study-pdfs` bucket, limits PDFs to 15 MB and sets storage access rules. Students must be logged in to upload. Uploads enter `pending` status and are not shown to everyone until approved by an admin. Approved PDF downloads use short-lived signed links.
-
-## 4. Payments and donations (important)
-The site displays the agreed premium prices: UGX 10,000 weekly and UGX 30,000 monthly. **Payments are not live just by uploading the ZIP.** To collect money, GACEB must open and verify a merchant account with a provider that supports the desired Uganda payment methods (for example Flutterwave or Pesapal), configure hosted checkout/payment links, and add them to `config.js` as `WEEKLY_PAYMENT_URL`, `MONTHLY_PAYMENT_URL`, and `DONATION_URL`.
-
-For a secure production subscription, a server-side webhook/Edge Function must verify each provider transaction before changing `subscriptions.status` or granting premium access. Do not activate premium based only on a browser redirect, and do not put payment secret keys, API secrets or mobile-money PINs in `config.js`. The front-end deliberately does not pretend that an unverified payment succeeded. Contact GACEB's payment provider for current onboarding, merchant approval and webhook details before accepting payments.
-
-## 5. Gauge Assistant
-Gauge Assistant currently provides helpful built-in study guidance and revision tips. Connecting a real AI model requires a server-side function and a private API key; do not put an AI secret key in browser JavaScript.
-
-## 6. Real images
-The `assets` folder includes the GACEB badge/logo and the real founder/teacher-award photos available in the current working files. The original badge image is used without changing its details.
-
-## Troubleshooting
-- **White page:** ensure `index.html` and `styles.css` are at the repository root, and the `assets` folder is alongside them. Check spelling/capitalization. Clear/reload the browser cache after deployment.
-- **Page works but login/resources say setup required:** that is expected until the Supabase URL/key are added and the SQL schema is run.
-- **Email confirmation fails:** add the exact published site URL to Supabase Auth's allowed redirect URLs.
-- **PDF upload fails:** check the private bucket exists, the student is logged in, and the file is a PDF no larger than 15 MB.
-- **Admin table missing:** confirm your own profile has `role='admin'`, then sign out and back in.
-
-This package is a practical deployable starter with working front-end flows and Supabase integration. Payment activation and live AI are intentionally gated until the secure provider/backend credentials are configured.
+## Important scope and honest limitations
+- **Image/logo fix:** all image assets are bundled under `assets/`; upload the folder along with the HTML files. File names and letter case must remain exactly as shown.
+- **PDFs, accounts, coin rewards, referrals and admin tables:** require the Supabase steps above. The included SQL defines private PDF storage and server-side database functions for the 5-coin rewards.
+- **Quizzes:** this version includes a working five-question sample quiz; it is a starter bank, not a complete official exam question bank.
+- **Study planner:** works offline and saves on the current browser/device only.
+- **Gauge Assistant:** provides built-in study guidance, not live generative AI. Live AI needs a server-side AI provider function and secret kept on the server.
+- **Payments/donations:** configure official hosted checkout URLs in `config.js`, and add server-side webhook verification before enabling real payments or premium activation. This static site does not falsely mark a payment as successful.
+- Do not upload copyrighted or private material without permission.
